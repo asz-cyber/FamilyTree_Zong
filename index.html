@@ -112,67 +112,43 @@
   .tag.unc{background:rgba(184,146,90,0.18); color:var(--gold);}
   .tag.chu{background:rgba(166,58,46,0.18); color:#D3877C;}
 
-  /* ---------- Tree (vertical org-chart, top-down boxes) ---------- */
+  /* ---------- Tree (vertical org-chart, top-down boxes, SVG connectors) ---------- */
   .tree-scroll{
     width:100%;
     overflow-x:auto;
+    overflow-y:visible;
     padding:10px 0 70px;
   }
   .tree-scroll::-webkit-scrollbar{height:10px;}
   .tree-scroll::-webkit-scrollbar-track{background:var(--ink);}
   .tree-scroll::-webkit-scrollbar-thumb{background:var(--ink-3); border-radius:5px;}
 
-  .orgchart{
-    display:table;
-    margin:0 auto;
-    white-space:nowrap;
-    padding-top:0;
-  }
-  .orgchart ul{
-    list-style:none;
+  .tree-canvas{
     position:relative;
-    padding-top:34px;
+    display:inline-block;
+    min-width:100%;
+    padding:10px 40px 10px;
   }
-  .orgchart{ list-style:none; position:relative; }
-  .orgchart > li{ padding-top:0; }
-  .orgchart li{
-    display:inline-table;
-    vertical-align:top;
-    text-align:center;
-    position:relative;
-    padding:34px 14px 0 14px;
-    white-space:normal;
+  #connectorSvg{
+    position:absolute; top:0; left:0;
+    width:100%; height:100%;
+    pointer-events:none;
+    overflow:visible;
   }
-  /* connector lines */
-  .orgchart li::before, .orgchart li::after{
-    content:'';
-    position:absolute; top:0; right:50%;
-    width:50%; height:34px;
-    border-top:1px solid var(--gold-dim);
+  .tree-nodes{
+    display:flex; justify-content:center;
+    position:relative; z-index:1;
   }
-  .orgchart li::after{
-    right:auto; left:50%;
-    border-left:1px solid var(--gold-dim);
-    border-top:1px solid var(--gold-dim);
+  .node-wrap{
+    display:flex; flex-direction:column; align-items:center;
+    padding:0 16px;
   }
-  .orgchart > li::before, .orgchart > li::after{ display:none; }
-  .orgchart li:only-child::before, .orgchart li:only-child::after{
-    border-top:0 none;
+  .children-row{
+    display:flex; align-items:flex-start; justify-content:center;
+    margin-top:46px;
   }
-  .orgchart li:only-child{ padding-top:0; }
-  .orgchart li:first-child::before{ border:0 none; }
-  .orgchart li:last-child::after{ border:0 none; }
-  .orgchart li:last-child::before{ border-right:1px solid var(--gold-dim); border-radius:0 4px 0 0; }
-  .orgchart li:first-child::after{ border-radius:4px 0 0 0; }
-  .orgchart li:only-child::after,.orgchart li:only-child::before{ border-radius:0; }
-  .orgchart ul::before{
-    content:'';
-    position:absolute; top:0; left:50%;
-    border-left:1px solid var(--gold-dim);
-    width:0; height:34px;
-  }
-  .orgchart li.no-parent-line::before,
-  .orgchart li.no-parent-line::after{ display:none; }
+  li.collapsed{} /* unused, kept for safety */
+  .node-wrap.collapsed > .children-row{ display:none; }
 
   .box{
     display:inline-flex; flex-direction:column; align-items:center; gap:3px;
@@ -184,10 +160,10 @@
     min-width:118px;
     cursor:pointer;
     position:relative;
-    transition:border-color .15s, transform .15s;
+    transition:border-color .15s;
   }
   .box:hover{ border-color:var(--gold); }
-  li[data-root="1"] .box{ border-top-color:var(--seal); }
+  .node-wrap[data-root="1"] > .box{ border-top-color:var(--seal); }
   .box .gen{
     font-family:var(--sans); font-size:10px; color:var(--ink);
     background:var(--gold-dim); border-radius:2px; padding:1px 6px;
@@ -213,10 +189,9 @@
     font-size:11px; line-height:1; display:none; align-items:center; justify-content:center;
     cursor:pointer; z-index:2;
   }
-  li.has-children .collapse-btn{ display:flex; }
-  li.collapsed > ul{ display:none; }
-  li.collapsed .collapse-btn::before{ content:'+'; }
-  li:not(.collapsed) .collapse-btn::before{ content:'\2212'; }
+  .node-wrap.has-children > .box .collapse-btn{ display:flex; }
+  .node-wrap.collapsed > .box .collapse-btn::before{ content:'+'; }
+  .node-wrap:not(.collapsed) > .box .collapse-btn::before{ content:'\2212'; }
 
   .box.dim{ opacity:0.22; }
   .box.match{ border-color:var(--seal); }
@@ -287,7 +262,7 @@
     h1{font-size:32px;}
     .box{min-width:96px; padding:9px 10px 8px;}
     .box .name{font-size:15px;}
-    .orgchart li{padding-left:8px; padding-right:8px;}
+    .node-wrap{padding:0 10px;}
   }
 </style>
 </head>
@@ -322,8 +297,11 @@
 
 </div>
 
-<div class="tree-scroll">
-  <ul class="orgchart" id="tree"></ul>
+<div class="tree-scroll" id="treeScroll">
+  <div class="tree-canvas" id="treeCanvas">
+    <svg id="connectorSvg"></svg>
+    <div class="tree-nodes" id="tree"></div>
+  </div>
 </div>
 
 <div id="modalRoot"></div>
@@ -422,11 +400,12 @@ const treeEl = document.getElementById('tree');
 const collapsedIds = new Set();
 
 function renderNode(n, isRoot){
-  const li = document.createElement('li');
-  li.dataset.id = n.id;
-  if(isRoot) li.dataset.root = '1';
-  if(n.children.length) li.classList.add('has-children');
-  if(collapsedIds.has(n.id)) li.classList.add('collapsed');
+  const wrap = document.createElement('div');
+  wrap.className = 'node-wrap';
+  wrap.dataset.id = n.id;
+  if(isRoot) wrap.dataset.root = '1';
+  if(n.children.length) wrap.classList.add('has-children');
+  if(collapsedIds.has(n.id)) wrap.classList.add('collapsed');
 
   const box = document.createElement('div');
   box.className = 'box';
@@ -447,39 +426,111 @@ function renderNode(n, isRoot){
     cbtn.className = 'collapse-btn';
     cbtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      li.classList.toggle('collapsed');
+      wrap.classList.toggle('collapsed');
       collapsedIds.has(n.id) ? collapsedIds.delete(n.id) : collapsedIds.add(n.id);
+      requestAnimationFrame(drawConnectors);
     });
     box.appendChild(cbtn);
   }
   box.querySelector('.add').addEventListener('click', (e) => { e.stopPropagation(); openModal('add', n); });
   box.querySelector('.edit').addEventListener('click', (e) => { e.stopPropagation(); openModal('edit', n); });
   box.querySelector('.del').addEventListener('click', (e) => { e.stopPropagation(); deleteNode(n); });
-  li.appendChild(box);
+  wrap.appendChild(box);
 
   if(n.children.length){
-    const ul = document.createElement('ul');
-    n.children.forEach(c => ul.appendChild(renderNode(c, false)));
-    li.appendChild(ul);
+    const row = document.createElement('div');
+    row.className = 'children-row';
+    n.children.forEach(c => row.appendChild(renderNode(c, false)));
+    wrap.appendChild(row);
   }
-  return li;
+  return wrap;
 }
 
 function render(){
   const {roots} = buildIndex();
   treeEl.innerHTML = '';
   roots.forEach(r => treeEl.appendChild(renderNode(r, true)));
+  requestAnimationFrame(drawConnectors);
 }
 render();
 
+// ---------- SVG connectors (recomputed from real box positions — stays aligned at any zoom level) ----------
+const svgNS = 'http://www.w3.org/2000/svg';
+function drawConnectors(){
+  const svg = document.getElementById('connectorSvg');
+  const canvas = document.getElementById('treeCanvas');
+  if(!svg || !canvas) return;
+  const w = canvas.scrollWidth, h = canvas.scrollHeight;
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', h);
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+  const cRect = canvas.getBoundingClientRect();
+  const lineColor = '#8A6C42';
+
+  function addLine(x1,y1,x2,y2){
+    const l = document.createElementNS(svgNS,'line');
+    l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+    l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+    l.setAttribute('stroke', lineColor);
+    l.setAttribute('stroke-width','1');
+    svg.appendChild(l);
+  }
+
+  document.querySelectorAll('.node-wrap.has-children').forEach(wrap => {
+    if(wrap.classList.contains('collapsed')) return;
+    const row = wrap.querySelector(':scope > .children-row');
+    if(!row) return;
+    const parentBox = wrap.querySelector(':scope > .box');
+    const pRect = parentBox.getBoundingClientRect();
+    const px = pRect.left + pRect.width/2 - cRect.left;
+    const py = pRect.bottom - cRect.top;
+
+    const childWraps = row.querySelectorAll(':scope > .node-wrap');
+    const childPts = Array.from(childWraps).map(cw => {
+      const cb = cw.querySelector(':scope > .box');
+      const cr = cb.getBoundingClientRect();
+      return { x: cr.left + cr.width/2 - cRect.left, y: cr.top - cRect.top };
+    });
+    if(!childPts.length) return;
+
+    const busY = py + 23;
+    addLine(px, py, px, busY);
+    if(childPts.length > 1){
+      const xs = childPts.map(p => p.x);
+      addLine(Math.min(...xs), busY, Math.max(...xs), busY);
+    }
+    childPts.forEach(p => addLine(p.x, busY, p.x, p.y));
+  });
+}
+
+let redrawTimer = null;
+function scheduleRedraw(){
+  clearTimeout(redrawTimer);
+  redrawTimer = setTimeout(() => requestAnimationFrame(drawConnectors), 80);
+}
+window.addEventListener('resize', scheduleRedraw);
+document.getElementById('treeScroll').addEventListener('scroll', () => {
+  // horizontal scroll doesn't change relative box positions inside canvas, no redraw needed
+}, {passive:true});
+if(window.ResizeObserver){
+  new ResizeObserver(scheduleRedraw).observe(document.getElementById('treeCanvas'));
+}
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(() => requestAnimationFrame(drawConnectors));
+}
+
 document.getElementById('expandAll').addEventListener('click', () => {
   collapsedIds.clear();
-  document.querySelectorAll('#tree li').forEach(li => li.classList.remove('collapsed'));
+  document.querySelectorAll('.node-wrap').forEach(w => w.classList.remove('collapsed'));
+  requestAnimationFrame(drawConnectors);
 });
 document.getElementById('collapseAll').addEventListener('click', () => {
-  document.querySelectorAll('#tree li.has-children').forEach(li => {
-    if(!li.dataset.root){ li.classList.add('collapsed'); collapsedIds.add(li.dataset.id); }
+  document.querySelectorAll('.node-wrap.has-children').forEach(w => {
+    if(!w.dataset.root){ w.classList.add('collapsed'); collapsedIds.add(w.dataset.id); }
   });
+  requestAnimationFrame(drawConnectors);
 });
 
 // ---------- edit mode ----------
@@ -584,28 +635,30 @@ searchEl.addEventListener('input', () => {
   const {byId} = buildIndex();
   const allBoxes = document.querySelectorAll('#tree .box');
   allBoxes.forEach(el => el.classList.remove('dim','match','path'));
-  if(!q) return;
+  if(!q){ return; }
 
   allBoxes.forEach(el => el.classList.add('dim'));
-  document.querySelectorAll('#tree li').forEach(li => li.classList.remove('collapsed'));
+  let changed = false;
+  document.querySelectorAll('.node-wrap.collapsed').forEach(w => { w.classList.remove('collapsed'); collapsedIds.delete(w.dataset.id); changed = true; });
 
   Object.values(byId).forEach(n => {
     if(n.name.includes(q)){
-      const li = document.querySelector(`li[data-id="${n.id}"]`);
-      if(!li) return;
-      const box = li.querySelector(':scope > .box');
+      const wrap = document.querySelector(`.node-wrap[data-id="${n.id}"]`);
+      if(!wrap) return;
+      const box = wrap.querySelector(':scope > .box');
       box.classList.remove('dim');
       box.classList.add('match');
       let cur = n;
       while(cur.parent){
-        const pli = document.querySelector(`li[data-id="${cur.parent}"]`);
-        const pbox = pli.querySelector(':scope > .box');
+        const pWrap = document.querySelector(`.node-wrap[data-id="${cur.parent}"]`);
+        const pbox = pWrap.querySelector(':scope > .box');
         pbox.classList.remove('dim');
         pbox.classList.add('path');
         cur = byId[cur.parent];
       }
     }
   });
+  if(changed) requestAnimationFrame(drawConnectors);
 });
 </script>
 </body>
