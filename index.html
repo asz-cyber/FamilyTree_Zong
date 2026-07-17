@@ -217,21 +217,58 @@
   .node-actions button:hover{ border-color:var(--gold); color:var(--gold); }
   .node-actions .del:hover{ border-color:var(--seal); color:#D3877C; }
 
-  /* ---------- Appendix ---------- */
-  .appendix{
-    margin-top:64px; padding-top:36px; border-top:1px solid var(--line);
-  }
-  .appendix h2{
-    font-family:var(--serif); font-size:20px; color:var(--gold); margin-bottom:16px; font-weight:600;
-  }
-  .appendix p{
-    font-family:var(--sans); font-size:14px; line-height:1.9; color:var(--paper-dim); margin-bottom:12px;
-  }
-  .appendix p b{color:var(--paper);}
-
   footer{
     text-align:center; margin-top:60px; font-size:12px; color:var(--paper-faint);
     font-family:var(--sans);
+  }
+
+  /* ---------- Nav tabs ---------- */
+  .tabs{
+    display:flex; gap:6px; justify-content:center;
+    border-bottom:1px solid var(--line);
+    margin-bottom:8px;
+  }
+  .tab-btn{
+    background:transparent; border:none; cursor:pointer;
+    font-family:var(--serif); font-size:15px; font-weight:600; color:var(--paper-dim);
+    padding:12px 22px 14px; letter-spacing:0.04em;
+    border-bottom:2px solid transparent;
+    transition:color .15s, border-color .15s;
+  }
+  .tab-btn:hover{ color:var(--paper); }
+  .tab-btn.active{ color:var(--gold); border-bottom-color:var(--seal); }
+  .tab-panel{ padding-top:36px; }
+
+  /* ---------- Origin detail (family history) ---------- */
+  .origin-detail{ padding-bottom:20px; }
+  .od-section{ margin-top:28px; }
+  .od-section:first-child{ margin-top:0; }
+  .od-section h3{
+    font-family:var(--serif); font-size:16px; font-weight:600; color:var(--paper);
+    margin-bottom:10px; padding-left:10px; border-left:2px solid var(--seal);
+  }
+  .od-section p{
+    font-family:var(--sans); font-size:13.5px; line-height:2; color:var(--paper-dim);
+    margin-bottom:10px;
+  }
+  .od-section p b{ color:var(--paper); font-weight:600; }
+  .od-note{ font-size:12.5px !important; color:var(--gold) !important; }
+  .genpoem{
+    display:grid; grid-template-columns:repeat(10, 1fr); gap:8px;
+    margin:16px 0; padding:16px; background:var(--ink-2); border:1px solid var(--line); border-radius:3px;
+  }
+  .genpoem span{
+    display:flex; flex-direction:column; align-items:center; gap:2px;
+    font-family:var(--serif); font-size:16px; font-weight:600; color:var(--paper);
+  }
+  .genpoem span i{
+    font-family:var(--sans); font-style:normal; font-size:9px; color:var(--gold-dim);
+  }
+  .od-source{
+    margin-top:24px; font-size:11.5px; color:var(--paper-faint); font-family:var(--sans);
+  }
+  @media (max-width:600px){
+    .genpoem{ grid-template-columns:repeat(5, 1fr); }
   }
 
   /* ---------- Edit mode ---------- */
@@ -282,8 +319,18 @@
     <div class="subtitle">兰底世系 · 电子谱</div>
   </header>
 
+  <nav class="tabs">
+    <button class="tab-btn" data-tab="origin">序</button>
+    <button class="tab-btn active" data-tab="tree">家谱</button>
+  </nav>
+
+</div>
+
+<div class="tab-panel" data-panel="tree" id="panelTree">
+<div class="wrap">
+
   <div class="origin">
-    <b>兰底始祖</b>，康熙六年（公元 1667 年）由<b>苏子埠</b>迁居兰底，定居立业，是为本支之始。以下世系自第七世<b>宗明光</b>公起（原谱可考最早一代），依原谱连线整理至第十六世。
+    <b>兰底始祖</b>，康熙六年（公元 1667 年）由<b>苏子埠</b>迁居兰底，定居立业，是为本支之始。以下世系自第七世<b>宗明光</b>公起（原谱可考最早一代）。
   </div>
 
   <div class="controls">
@@ -310,15 +357,58 @@
     <div class="tree-nodes" id="tree"></div>
   </div>
 </div>
+</div>
 
 <div id="modalRoot"></div>
 
+<div class="tab-panel" data-panel="origin" id="panelOrigin" style="display:none">
 <div class="wrap">
 
+  <div class="origin-detail">
+
+    <div class="od-section">
+      <h3>始祖溯源</h3>
+      <p>始祖宗天一，江西抚州府监川县七十三都一图人。明初从龙濠州，以军功官迁户，授武德将军。洪武二年，食邑灵山卫府，世袭其职后，封都督职，镇守灵山卫，后五世同俸禄。</p>
+      <p>始祖宗天一镇守灵山卫后，次子宗纪、三子宗宽，明初由灵山卫迁居平度东南苏子埠疃西头，地名"宗家来"。同治三年立碑记，使后世明白各祖的来龙去脉和迁居各方村名，如下：苏子埠、大洪兰、小高家庄、大高家庄、兰底、黄丘、平度城、李村、蓊玉头、栾家官庄、大王头、宗家庄、昌里、亭兰邱、栾家庄、胶县城、即墨城、白河庙桥西头（桑园）、大店子、杜家庙子、郝家堰、栾家下庄、李家集、杨哥庄等村。</p>
+      <p>七世尚礼、明光兄弟俩：尚礼由苏子埠迁居即墨城南李村，配吴氏，子二，万春、长春。明光配马氏，康熙六年，由苏子埠迁居兰底，生子二，守城、广厚。</p>
+    </div>
+
+    <div class="od-section">
+      <h3>宗姓起源</h3>
+      <p>宗姓起源河东，祖宗宗伯。</p>
+      <p><b>姓氏来源：</b>①《元和姓纂》上指出，周大夫宗伯之子，后以官名氏。左传有宗鲁，汉宗俱碑，四岳之后望出河东。②《通志·氏族略》记载，宗氏又为宗伯氏，周大夫宗伯之后，齐有宗楼，卫有宗鲁。</p>
+      <p>古代的河东，在今山西省永济县西，蒲州镇一带，宗姓发源地便在这里。在宗姓的发展过程中，依照古文献判断，先有复姓宗伯氏，然后才简略成一个字为"宗"氏。</p>
+      <p><b>历史名人：</b>周代时，卫国有以身殉义而名垂千古的宗鲁。春秋时，齐有大夫宗楼；汉代有名臣宗伯凤。三国时有镇军大将军宗预。北宋有名臣宗悫，以"乘长风破万里浪"一句名言形容男儿有远大志向而传后世。南宋有抗金名将宗泽，字汝霖，义乌人，有文武才，初为知州，颇有政声，二帝北狩，宗泽以副元帅从磁州起兵援助，累战累胜，后为开封府知府，进驻东京留守，威名远扬北方，呼为"宗爷爷"，金人不敢来东京。宗泽上书多次，要高宗还汴京，收复失地，均为投降派所阻，忧郁成疾，卒谥忠简，著有《宗忠简集》。齐有艺术家宗测，明代有文学家宗臣、宗显，有镇守灵山卫都督宗天一，清代江都有词人宗元鼎。</p>
+    </div>
+
+    <div class="od-section">
+      <h3>堂号与楹联</h3>
+      <p><b>忠诚堂。</b>出自宋代宗泽的故事：宗泽，字汝霖，元石进士，文武全才，为抗金名将，历史上声望颇高。这位忠诚老将，死后谥为忠简，宗氏家人为纪念这位忠诚老将，遂以"忠诚"为堂名，一直沿用到后世。</p>
+      <p><b>楹联：</b>气概凌云（宗悫），忠态日（宗泽）。</p>
+    </div>
+
+    <div class="od-section">
+      <h3>字辈歌</h3>
+      <p>据前世大王头宗学善高祖传谱，以留前贰拾辈，"学"字为拾陆世下传。今由兰底宗成俊提议，由宗绪锋与洪兰宗成渭、宗成旭提字，经宗生瑞、宗宿瑞、宗成英、宗成泽、宗绪贤、宗绪华、宗绍志五世研究同意，后续贰拾辈，拾陆至伍拾世，前后共四十辈，以供后世子孙流传。</p>
+      <div class="genpoem">
+        <span>学<i>16</i></span><span>景<i>17</i></span><span>瑞<i>18</i></span><span>成<i>19</i></span><span>绪<i>20</i></span><span>绍<i>21</i></span><span>毓<i>22</i></span><span>济<i>23</i></span><span>得<i>24</i></span><span>昌<i>25</i></span>
+        <span>广<i>26</i></span><span>培<i>27</i></span><span>传<i>28</i></span><span>太<i>29</i></span><span>庆<i>30</i></span><span>化<i>31</i></span><span>宪<i>32</i></span><span>延<i>33</i></span><span>贵<i>34</i></span><span>祥<i>35</i></span>
+        <span>智<i>36</i></span><span>勤<i>37</i></span><span>建<i>38</i></span><span>晓<i>39</i></span><span>礼<i>40</i></span><span>忠<i>41</i></span><span>信<i>42</i></span><span>惠<i>43</i></span><span>宁<i>44</i></span><span>康<i>45</i></span>
+        <span>柯<i>46</i></span><span>叶<i>47</i></span><span>千<i>48</i></span><span>代<i>49</i></span><span>胜<i>50</i></span><span>泽<i>51</i></span><span>源<i>52</i></span><span>泉<i>53</i></span><span>百<i>54</i></span><span>芳<i>55</i></span>
+      </div>
+      <p class="od-note">对照本页世系图：宗德瑞为"瑞"字辈（十八世），成字辈（十九世）、绪字辈（二十世）、绍字辈（二十一世）与此字辈歌完全吻合。</p>
+    </div>
+
+    <p class="od-source">本史料来自社会科学院姓氏研究会。二〇〇三年农历癸未年初夏，宗成俊重编；字辈歌由宗成俊记于二〇〇二年农历壬午年。</p>
+  </div>
+
+</div>
+</div>
+
+<div class="wrap">
   <footer>
     根据家谱扫描件整理 · 如发现错漏，请直接修改本页 data 数据后重新发布
   </footer>
-
 </div>
 
 <script>
@@ -483,6 +573,19 @@ function render(){
   requestAnimationFrame(drawConnectors);
 }
 render();
+
+// ---------- tab switching ----------
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const target = btn.dataset.tab;
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.style.display = (p.dataset.panel === target) ? '' : 'none';
+    });
+    if(target === 'tree') requestAnimationFrame(drawConnectors);
+  });
+});
 
 // ---------- SVG connectors (recomputed from real box positions — stays aligned at any zoom level) ----------
 const svgNS = 'http://www.w3.org/2000/svg';
