@@ -297,10 +297,9 @@
   <div class="toolbar-note">编辑模式已开启：把鼠标移到某个人上会出现「+子女」「编辑」「删除」按钮。改动会自动保存在本浏览器里；改完后点「下载更新后的网页」，把下载的文件重新上传到 GitHub 覆盖旧文件，家人看到的网站就会更新。</div>
 
   <div class="legend">
-    <div><span class="gender m" style="margin-right:4px;">子</span>男性　<span class="gender f" style="margin-right:4px;">女</span>女性（仅标本家宗氏血亲，配偶不标）</div>
+    <div><span class="gender m" style="margin-right:4px;">子</span>男性　<span class="gender f" style="margin-right:4px;">女</span>女性</div>
     <div><span class="tag chu">出嗣</span>过继给他支为嗣子</div>
     <div><span class="tag chu">绝</span>无嗣，该支未再往下传</div>
-    <div>「配」后为配偶姓氏；空白表示原谱未载 · 方框上的圆点可折叠/展开该支</div>
   </div>
 
 </div>
@@ -315,11 +314,6 @@
 <div id="modalRoot"></div>
 
 <div class="wrap">
-
-  <div class="appendix">
-    <h2>附录 · 待整理内容</h2>
-    <p><b>其他记录（未纳入主线）：</b>原谱右侧栏另有一列以「绝」（无嗣）标注的条目，跨第十二、二十、二十一世等多个世代，以及单独出现的「第十一世 · 绝」一条。这些位置独立、与主线连接不明确，暂未并入以上世系图，需要您协助确认它们属于哪一支、连接在哪位祖先之下。</p>
-  </div>
 
   <footer>
     根据家谱扫描件整理 · 如发现错漏，请直接修改本页 data 数据后重新发布
@@ -399,18 +393,25 @@ const SEED_DATA = [
   {id:'n48', parent:'n36', name:'宗绍瑜', spouse:'', gen:21, gender:'f'},
 ];
 
+const DATA_VERSION = 'v3'; // bump this whenever SEED_DATA below is updated — invalidates stale browser cache automatically
 const STORAGE_KEY = 'zong-family-data-v1';
 let data = loadData();
 
 function loadData(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) return JSON.parse(raw);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && parsed.version === DATA_VERSION && Array.isArray(parsed.data)){
+        return parsed.data; // same version as this file — trust local edits
+      }
+      // stale version from an older file — this file's built-in data is newer, use it instead
+    }
   }catch(e){ /* localStorage unavailable (e.g. sandboxed preview) — fall back to seed */ }
   return JSON.parse(JSON.stringify(SEED_DATA));
 }
 function persist(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify({version: DATA_VERSION, data})); }
   catch(e){ /* ignore — export button remains the reliable way to save */ }
 }
 
@@ -656,7 +657,7 @@ document.getElementById('resetData').addEventListener('click', () => {
 // ---------- export updated page ----------
 document.getElementById('exportHtml').addEventListener('click', () => {
   const fullHtml = document.documentElement.outerHTML
-    .replace(/const SEED_DATA = \[[\s\S]*?\];\s*\n\nconst STORAGE_KEY/, `const SEED_DATA = ${JSON.stringify(data, null, 2)};\n\nconst STORAGE_KEY`);
+    .replace(/const SEED_DATA = \[[\s\S]*?\];/, `const SEED_DATA = ${JSON.stringify(data, null, 2)};`);
   const blob = new Blob(['<!DOCTYPE html>\n' + fullHtml], {type:'text/html'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
