@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宗氏家谱 · 兰底世系</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #1D2420;
+    --ink-2: #262E28;
+    --ink-3: #303A32;
+    --paper: #E7DFC9;
+    --paper-dim: #A79E88;
+    --paper-faint: #6E6A5B;
+    --seal: #A63A2E;
+    --seal-dim: #7A2C22;
+    --gold: #B8925A;
+    --gold-dim: #8A6C42;
+    --line: rgba(231,223,201,0.16);
+    --serif: 'Noto Serif SC', serif;
+    --sans: 'Noto Sans SC', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--ink); color:var(--paper); font-family:var(--sans);}
+  body{
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(184,146,90,0.07), transparent 55%),
+      radial-gradient(ellipse at 90% 30%, rgba(166,58,46,0.05), transparent 45%);
+    min-height:100vh;
+    padding-bottom:80px;
+  }
+  /* subtle paper grain */
+  body::before{
+    content:'';
+    position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap{max-width:920px; margin:0 auto; padding:0 22px; position:relative; z-index:1;}
+
+  /* ---------- Header ---------- */
+  header{padding:64px 0 40px; text-align:center; position:relative;}
+  .seal{
+    width:74px; height:74px; margin:0 auto 22px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--seal);
+    color:#F3E7D6;
+    font-family:var(--serif); font-weight:900; font-size:34px;
+    transform:rotate(-3deg);
+    box-shadow:0 0 0 1.5px rgba(243,231,214,0.35) inset, 0 6px 18px rgba(0,0,0,0.35);
+    border-radius:3px;
+    position:relative;
+  }
+  .seal::after{
+    content:''; position:absolute; inset:6px; border:1px solid rgba(243,231,214,0.35); border-radius:1px;
+  }
+  h1{
+    font-family:var(--serif); font-weight:700; font-size:44px; letter-spacing:0.08em;
+    color:var(--paper);
+  }
+  .subtitle{
+    margin-top:10px; font-size:14px; letter-spacing:0.25em; color:var(--gold);
+    font-family:var(--sans); font-weight:500; text-transform:uppercase;
+  }
+
+  /* ---------- Origin banner ---------- */
+  .origin{
+    margin:36px 0 48px;
+    border:1px solid var(--line);
+    border-left:3px solid var(--seal);
+    background:rgba(38,46,40,0.5);
+    padding:22px 26px;
+    font-family:var(--serif);
+    font-size:16px;
+    line-height:1.9;
+    color:var(--paper);
+  }
+  .origin b{color:var(--gold); font-weight:600;}
+
+  /* ---------- Controls ---------- */
+  .controls{
+    display:flex; gap:12px; align-items:center; margin-bottom:36px;
+    flex-wrap:wrap;
+  }
+  #search{
+    flex:1; min-width:200px;
+    background:var(--ink-2); border:1px solid var(--line); color:var(--paper);
+    font-family:var(--sans); font-size:15px;
+    padding:11px 16px; border-radius:2px;
+    outline:none;
+  }
+  #search:focus{border-color:var(--gold);}
+  #search::placeholder{color:var(--paper-faint);}
+  .btn{
+    background:transparent; border:1px solid var(--line); color:var(--paper-dim);
+    font-family:var(--sans); font-size:13px; padding:11px 16px; cursor:pointer; border-radius:2px;
+    transition:border-color .15s, color .15s;
+  }
+  .btn:hover{border-color:var(--gold); color:var(--gold);}
+
+  /* ---------- Legend ---------- */
+  .legend{
+    display:flex; gap:22px; flex-wrap:wrap; font-size:12.5px; color:var(--paper-dim);
+    margin-bottom:44px; padding-bottom:20px; border-bottom:1px solid var(--line);
+  }
+  .legend span.tag{
+    display:inline-block; font-size:10.5px; padding:1px 6px; border-radius:2px;
+    margin-right:6px; font-family:var(--sans); font-weight:600; letter-spacing:0.05em;
+  }
+  .tag.unc{background:rgba(184,146,90,0.18); color:var(--gold);}
+  .tag.chu{background:rgba(166,58,46,0.18); color:#D3877C;}
+
+  /* ---------- Tree (vertical org-chart, top-down boxes) ---------- */
+  .tree-scroll{
+    width:100%;
+    overflow-x:auto;
+    padding:10px 0 70px;
+  }
+  .tree-scroll::-webkit-scrollbar{height:10px;}
+  .tree-scroll::-webkit-scrollbar-track{background:var(--ink);}
+  .tree-scroll::-webkit-scrollbar-thumb{background:var(--ink-3); border-radius:5px;}
+
+  .orgchart{
+    display:table;
+    margin:0 auto;
+    white-space:nowrap;
+    padding-top:0;
+  }
+  .orgchart ul{
+    list-style:none;
+    position:relative;
+    padding-top:34px;
+  }
+  .orgchart{ list-style:none; position:relative; }
+  .orgchart > li{ padding-top:0; }
+  .orgchart li{
+    display:inline-table;
+    vertical-align:top;
+    text-align:center;
+    position:relative;
+    padding:34px 14px 0 14px;
+    white-space:normal;
+  }
+  /* connector lines */
+  .orgchart li::before, .orgchart li::after{
+    content:'';
+    position:absolute; top:0; right:50%;
+    width:50%; height:34px;
+    border-top:1px solid var(--gold-dim);
+  }
+  .orgchart li::after{
+    right:auto; left:50%;
+    border-left:1px solid var(--gold-dim);
+    border-top:1px solid var(--gold-dim);
+  }
+  .orgchart > li::before, .orgchart > li::after{ display:none; }
+  .orgchart li:only-child::before, .orgchart li:only-child::after{
+    border-top:0 none;
+  }
+  .orgchart li:only-child{ padding-top:0; }
+  .orgchart li:first-child::before{ border:0 none; }
+  .orgchart li:last-child::after{ border:0 none; }
+  .orgchart li:last-child::before{ border-right:1px solid var(--gold-dim); border-radius:0 4px 0 0; }
+  .orgchart li:first-child::after{ border-radius:4px 0 0 0; }
+  .orgchart li:only-child::after,.orgchart li:only-child::before{ border-radius:0; }
+  .orgchart ul::before{
+    content:'';
+    position:absolute; top:0; left:50%;
+    border-left:1px solid var(--gold-dim);
+    width:0; height:34px;
+  }
+  .orgchart li.no-parent-line::before,
+  .orgchart li.no-parent-line::after{ display:none; }
+
+  .box{
+    display:inline-flex; flex-direction:column; align-items:center; gap:3px;
+    background:var(--ink-2);
+    border:1px solid var(--line);
+    border-top:2px solid var(--gold-dim);
+    border-radius:3px;
+    padding:12px 16px 10px;
+    min-width:118px;
+    cursor:pointer;
+    position:relative;
+    transition:border-color .15s, transform .15s;
+  }
+  .box:hover{ border-color:var(--gold); }
+  li[data-root="1"] .box{ border-top-color:var(--seal); }
+  .box .gen{
+    font-family:var(--sans); font-size:10px; color:var(--ink);
+    background:var(--gold-dim); border-radius:2px; padding:1px 6px;
+    letter-spacing:0.03em; margin-bottom:4px;
+  }
+  .box .name{
+    font-family:var(--serif); font-size:17px; font-weight:600; color:var(--paper);
+    letter-spacing:0.06em; line-height:1.3;
+  }
+  .box .spouse{ font-family:var(--sans); font-size:12px; color:var(--paper-dim); }
+  .box .note{
+    font-family:var(--sans); font-size:10.5px; color:#D3877C;
+    border:1px solid rgba(211,135,124,0.4); border-radius:2px; padding:0 5px; margin-top:2px;
+  }
+  .box .unc{
+    font-family:var(--sans); font-size:10.5px; color:var(--gold);
+    border:1px solid rgba(184,146,90,.4); border-radius:2px; padding:0 5px; margin-top:2px;
+  }
+  .collapse-btn{
+    position:absolute; left:50%; bottom:-11px; transform:translateX(-50%);
+    width:20px; height:20px; border-radius:50%;
+    background:var(--ink-3); border:1px solid var(--gold-dim); color:var(--gold);
+    font-size:11px; line-height:1; display:none; align-items:center; justify-content:center;
+    cursor:pointer; z-index:2;
+  }
+  li.has-children .collapse-btn{ display:flex; }
+  li.collapsed > ul{ display:none; }
+  li.collapsed .collapse-btn::before{ content:'+'; }
+  li:not(.collapsed) .collapse-btn::before{ content:'\2212'; }
+
+  .box.dim{ opacity:0.22; }
+  .box.match{ border-color:var(--seal); }
+  .box.match .name{ color:#D3877C; }
+  .box.path{ border-color:var(--gold); }
+
+  /* edit-mode actions under a box */
+  .node-actions{
+    display:none; gap:5px; margin-top:8px;
+  }
+  body.edit-mode .node-actions{ display:flex; }
+  .node-actions button{
+    font-family:var(--sans); font-size:10px; border:1px solid var(--line);
+    background:var(--ink); color:var(--paper-dim); border-radius:2px; padding:2px 6px; cursor:pointer;
+  }
+  .node-actions button:hover{ border-color:var(--gold); color:var(--gold); }
+  .node-actions .del:hover{ border-color:var(--seal); color:#D3877C; }
+
+  /* ---------- Appendix ---------- */
+  .appendix{
+    margin-top:64px; padding-top:36px; border-top:1px solid var(--line);
+  }
+  .appendix h2{
+    font-family:var(--serif); font-size:20px; color:var(--gold); margin-bottom:16px; font-weight:600;
+  }
+  .appendix p{
+    font-family:var(--sans); font-size:14px; line-height:1.9; color:var(--paper-dim); margin-bottom:12px;
+  }
+  .appendix p b{color:var(--paper);}
+
+  footer{
+    text-align:center; margin-top:60px; font-size:12px; color:var(--paper-faint);
+    font-family:var(--sans);
+  }
+
+  /* ---------- Edit mode ---------- */
+  .btn.active{border-color:var(--seal); color:#D3877C;}
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(10,12,10,0.65); z-index:50;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal{
+    background:var(--ink-2); border:1px solid var(--line); border-top:3px solid var(--seal);
+    width:100%; max-width:420px; padding:26px; border-radius:2px;
+  }
+  .modal h3{font-family:var(--serif); color:var(--gold); font-size:18px; margin-bottom:18px; font-weight:600;}
+  .modal label{display:block; font-size:12px; color:var(--paper-dim); margin:14px 0 6px;}
+  .modal input[type=text]{
+    width:100%; background:var(--ink); border:1px solid var(--line); color:var(--paper);
+    padding:9px 12px; border-radius:2px; font-family:var(--sans); font-size:14px; outline:none;
+  }
+  .modal input[type=text]:focus{border-color:var(--gold);}
+  .modal .chk{display:flex; align-items:center; gap:8px; margin-top:16px;}
+  .modal .chk input{width:auto;}
+  .modal .chk label{margin:0; font-size:13px; color:var(--paper);}
+  .modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:24px;}
+  .modal-actions .btn{padding:9px 18px;}
+  .modal-actions .primary{background:var(--seal); border-color:var(--seal); color:#F3E7D6;}
+  .modal-actions .primary:hover{color:#fff;}
+
+  .toolbar-note{
+    font-size:12px; color:var(--paper-faint); margin:-24px 0 30px; display:none;
+  }
+  body.edit-mode .toolbar-note{display:block;}
+
+  @media (max-width:600px){
+    h1{font-size:32px;}
+    .box{min-width:96px; padding:9px 10px 8px;}
+    .box .name{font-size:15px;}
+    .orgchart li{padding-left:8px; padding-right:8px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="seal">宗</div>
+    <h1>宗氏家谱</h1>
+    <div class="subtitle">兰底世系 · 电子谱</div>
+  </header>
+
+  <div class="origin">
+    <b>兰底始祖</b>，康熙六年（公元 1667 年）由<b>苏子埠</b>迁居兰底，定居立业，是为本支之始。以下世系自第七世<b>宗明光</b>公起（原谱可考最早一代），依原谱连线整理至第十六世。
+  </div>
+
+  <div class="controls">
+    <input id="search" type="text" placeholder="搜索姓名，例如「绪国」…">
+    <button class="btn" id="expandAll">展开全部</button>
+    <button class="btn" id="collapseAll">折叠全部</button>
+    <button class="btn" id="editToggle">✏️ 编辑模式</button>
+    <button class="btn" id="exportHtml">⬇ 下载更新后的网页</button>
+    <button class="btn" id="resetData">恢复初始数据</button>
+  </div>
+  <div class="toolbar-note">编辑模式已开启：把鼠标移到某个人上会出现「+子女」「编辑」「删除」按钮。改动会自动保存在本浏览器里；改完后点「下载更新后的网页」，把下载的文件重新上传到 GitHub 覆盖旧文件，家人看到的网站就会更新。</div>
+
+  <div class="legend">
+    <div><span class="tag chu">出嗣</span>过继给他支为嗣子</div>
+    <div><span class="tag chu">绝</span>无嗣，该支未再往下传</div>
+    <div>「配」后为配偶姓氏；空白表示原谱未载 · 方框上的圆点可折叠/展开该支</div>
+  </div>
+
+</div>
+
+<div class="tree-scroll">
+  <ul class="orgchart" id="tree"></ul>
+</div>
+
+<div id="modalRoot"></div>
+
+<div class="wrap">
+
+  <div class="appendix">
+    <h2>附录 · 待整理内容</h2>
+    <p><b>其他记录（未纳入主线）：</b>原谱右侧栏另有一列以「绝」（无嗣）标注的条目，跨第十二、二十、二十一世等多个世代，以及单独出现的「第十一世 · 绝」一条。这些位置独立、与主线连接不明确，暂未并入以上世系图，需要您协助确认它们属于哪一支、连接在哪位祖先之下。</p>
+  </div>
+
+  <footer>
+    根据家谱扫描件整理 · 如发现错漏，请直接修改本页 data 数据后重新发布
+  </footer>
+
+</div>
+
+<script>
+// ---------- Seed data (as digitized from the original scanned genealogy) ----------
+const SEED_DATA = [
+  {id:'n1', parent:null, name:'宗明光', spouse:'马氏', gen:7},
+
+  {id:'n2', parent:'n1', name:'宗广厚', spouse:'吴氏', gen:8},
+  {id:'n3', parent:'n1', name:'宗守城', spouse:'姜氏', gen:8},
+
+  {id:'n4', parent:'n2', name:'宗长芝', spouse:'刘氏', gen:9},
+  {id:'n5', parent:'n2', name:'宗长才', spouse:'张氏', gen:9},
+
+  {id:'n6', parent:'n5', name:'宗庆', spouse:'戈刘氏', gen:10},
+  {id:'n7', parent:'n5', name:'宗景', spouse:'', gen:10},
+  {id:'n8', parent:'n5', name:'宗胜', spouse:'', gen:10},
+  {id:'n9', parent:'n5', name:'宗强', spouse:'', gen:10},
+
+  {id:'n10', parent:'n6', name:'宗茂祥', spouse:'', gen:11},
+  {id:'n11', parent:'n6', name:'宗茂福', spouse:'', gen:11},
+  {id:'n12', parent:'n6', name:'宗茂礼', spouse:'许氏', gen:11},
+  {id:'n13', parent:'n6', name:'宗茂林', spouse:'', gen:11, note:'出嗣'},
+
+  {id:'n14', parent:'n10', name:'宗义', spouse:'', gen:12},
+  {id:'n15', parent:'n10', name:'宗伸', spouse:'', gen:12},
+  {id:'n16', parent:'n10', name:'宗仕', spouse:'张李氏', gen:12},
+
+  {id:'n17', parent:'n16', name:'宗福魁', spouse:'杜马氏', gen:13},
+
+  {id:'n18', parent:'n17', name:'宗殿举', spouse:'王马杨氏', gen:14},
+  {id:'n19', parent:'n17', name:'宗殿选', spouse:'马氏', gen:14},
+
+  {id:'n20', parent:'n18', name:'宗作升', spouse:'高氏', gen:15},
+  {id:'n23', parent:'n19', name:'宗作忠', spouse:'', gen:15, note:'出嗣'},
+  {id:'n24', parent:'n19', name:'宗作义', spouse:'刘氏', gen:15},
+
+  {id:'n21', parent:'n20', name:'宗昭喜', spouse:'张氏', gen:16},
+  {id:'n25', parent:'n24', name:'宗昭丰', spouse:'刘氏', gen:16},
+
+  {id:'n22', parent:'n21', name:'宗景堂', spouse:'高氏', gen:17, note:'绝'},
+  {id:'n26', parent:'n25', name:'宗景田', spouse:'夏氏', gen:17},
+
+  {id:'n27', parent:'n26', name:'宗德瑞', spouse:'高爱美', gen:18, note:'字子光'},
+
+  {id:'n30', parent:'n27', name:'宗成恒', spouse:'周甫英', gen:19},
+  {id:'n29', parent:'n27', name:'宗成业', spouse:'邵春梅', gen:19},
+  {id:'n28', parent:'n27', name:'宗成义', spouse:'王宜兰', gen:19},
+  {id:'n31', parent:'n27', name:'宗成文', spouse:'刘洪英', gen:19},
+
+  {id:'n32', parent:'n28', name:'宗绪国', spouse:'牛海霞', gen:20},
+
+  {id:'n33', parent:'n32', name:'宗绍翔', spouse:'程惠妮', gen:21},
+];
+
+const STORAGE_KEY = 'zong-family-data-v1';
+let data = loadData();
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){ /* localStorage unavailable (e.g. sandboxed preview) — fall back to seed */ }
+  return JSON.parse(JSON.stringify(SEED_DATA));
+}
+function persist(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch(e){ /* ignore — export button remains the reliable way to save */ }
+}
+
+let nextIdCounter = Math.max(0, ...data.map(d => parseInt((d.id||'n0').slice(1))||0)) + 1;
+function newId(){ return 'n' + (nextIdCounter++); }
+
+function buildIndex(){
+  const byId = Object.fromEntries(data.map(d => [d.id, {...d, children:[]}]));
+  Object.values(byId).forEach(d => { if(d.parent && byId[d.parent]) byId[d.parent].children.push(d); });
+  const roots = Object.values(byId).filter(d => !d.parent);
+  return {byId, roots};
+}
+
+const treeEl = document.getElementById('tree');
+const collapsedIds = new Set();
+
+function renderNode(n, isRoot){
+  const li = document.createElement('li');
+  li.dataset.id = n.id;
+  if(isRoot) li.dataset.root = '1';
+  if(n.children.length) li.classList.add('has-children');
+  if(collapsedIds.has(n.id)) li.classList.add('collapsed');
+
+  const box = document.createElement('div');
+  box.className = 'box';
+  box.innerHTML = `
+    <span class="gen">${n.gen}世</span>
+    <span class="name">${n.name}</span>
+    ${n.spouse ? `<span class="spouse">配 ${n.spouse}</span>` : ''}
+    ${n.note ? `<span class="note">${n.note}</span>` : ''}
+    ${n.uncertain ? `<span class="unc">待确认</span>` : ''}
+    <span class="node-actions">
+      <button class="add" title="添加子女">+子女</button>
+      <button class="edit" title="编辑">编辑</button>
+      <button class="del" title="删除">删除</button>
+    </span>
+  `;
+  if(n.children.length){
+    const cbtn = document.createElement('span');
+    cbtn.className = 'collapse-btn';
+    cbtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      li.classList.toggle('collapsed');
+      collapsedIds.has(n.id) ? collapsedIds.delete(n.id) : collapsedIds.add(n.id);
+    });
+    box.appendChild(cbtn);
+  }
+  box.querySelector('.add').addEventListener('click', (e) => { e.stopPropagation(); openModal('add', n); });
+  box.querySelector('.edit').addEventListener('click', (e) => { e.stopPropagation(); openModal('edit', n); });
+  box.querySelector('.del').addEventListener('click', (e) => { e.stopPropagation(); deleteNode(n); });
+  li.appendChild(box);
+
+  if(n.children.length){
+    const ul = document.createElement('ul');
+    n.children.forEach(c => ul.appendChild(renderNode(c, false)));
+    li.appendChild(ul);
+  }
+  return li;
+}
+
+function render(){
+  const {roots} = buildIndex();
+  treeEl.innerHTML = '';
+  roots.forEach(r => treeEl.appendChild(renderNode(r, true)));
+}
+render();
+
+document.getElementById('expandAll').addEventListener('click', () => {
+  collapsedIds.clear();
+  document.querySelectorAll('#tree li').forEach(li => li.classList.remove('collapsed'));
+});
+document.getElementById('collapseAll').addEventListener('click', () => {
+  document.querySelectorAll('#tree li.has-children').forEach(li => {
+    if(!li.dataset.root){ li.classList.add('collapsed'); collapsedIds.add(li.dataset.id); }
+  });
+});
+
+// ---------- edit mode ----------
+document.getElementById('editToggle').addEventListener('click', (e) => {
+  document.body.classList.toggle('edit-mode');
+  e.target.classList.toggle('active');
+});
+
+// ---------- modal ----------
+const modalRoot = document.getElementById('modalRoot');
+function openModal(mode, node){
+  const isAdd = mode === 'add';
+  const wrap = document.createElement('div');
+  wrap.className = 'modal-backdrop';
+  wrap.innerHTML = `
+    <div class="modal">
+      <h3>${isAdd ? `为「${node.name}」添加子女` : `编辑「${node.name}」`}</h3>
+      <label>姓名</label>
+      <input type="text" id="f_name" value="${isAdd ? '' : node.name}">
+      <label>配偶（可留空）</label>
+      <input type="text" id="f_spouse" value="${isAdd ? '' : (node.spouse||'')}">
+      <label>世代（数字）</label>
+      <input type="text" id="f_gen" value="${isAdd ? (node.gen+1) : node.gen}">
+      <label>备注（如：出嗣 / 字某某，可留空）</label>
+      <input type="text" id="f_note" value="${isAdd ? '' : (node.note||'')}">
+      <div class="chk">
+        <input type="checkbox" id="f_unc" ${(!isAdd && node.uncertain) ? 'checked' : ''}>
+        <label for="f_unc">此人的世系归属待确认</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="m_cancel">取消</button>
+        <button class="btn primary" id="m_save">${isAdd ? '添加' : '保存'}</button>
+      </div>
+    </div>
+  `;
+  modalRoot.appendChild(wrap);
+  wrap.addEventListener('click', (e) => { if(e.target === wrap) wrap.remove(); });
+  wrap.querySelector('#m_cancel').addEventListener('click', () => wrap.remove());
+  wrap.querySelector('#m_save').addEventListener('click', () => {
+    const name = wrap.querySelector('#f_name').value.trim();
+    if(!name){ alert('请填写姓名'); return; }
+    const spouse = wrap.querySelector('#f_spouse').value.trim();
+    const gen = parseInt(wrap.querySelector('#f_gen').value) || (isAdd ? node.gen+1 : node.gen);
+    const note = wrap.querySelector('#f_note').value.trim();
+    const uncertain = wrap.querySelector('#f_unc').checked;
+
+    if(isAdd){
+      data.push({id:newId(), parent:node.id, name, spouse, gen, note, uncertain});
+      collapsedIds.delete(node.id);
+    } else {
+      const rec = data.find(d => d.id === node.id);
+      Object.assign(rec, {name, spouse, gen, note, uncertain});
+    }
+    persist();
+    render();
+    wrap.remove();
+  });
+  wrap.querySelector('#f_name').focus();
+}
+
+function deleteNode(node){
+  const {byId} = buildIndex();
+  const full = byId[node.id];
+  const count = countDescendants(full);
+  const msg = count > 0
+    ? `「${node.name}」下有 ${count} 位后代记录，删除会一并删除他们，确定吗？`
+    : `确定删除「${node.name}」吗？`;
+  if(!confirm(msg)) return;
+  const toRemove = new Set();
+  (function collect(n){ toRemove.add(n.id); n.children.forEach(collect); })(full);
+  data = data.filter(d => !toRemove.has(d.id));
+  persist();
+  render();
+}
+function countDescendants(n){
+  return n.children.reduce((sum, c) => sum + 1 + countDescendants(c), 0);
+}
+
+document.getElementById('resetData').addEventListener('click', () => {
+  if(!confirm('恢复到最初的谱系数据？当前浏览器里保存的修改会被清除（如已下载过网页文件，那份不受影响）。')) return;
+  data = JSON.parse(JSON.stringify(SEED_DATA));
+  collapsedIds.clear();
+  persist();
+  render();
+});
+
+// ---------- export updated page ----------
+document.getElementById('exportHtml').addEventListener('click', () => {
+  const fullHtml = document.documentElement.outerHTML
+    .replace(/const SEED_DATA = \[[\s\S]*?\];\s*\n\nconst STORAGE_KEY/, `const SEED_DATA = ${JSON.stringify(data, null, 2)};\n\nconst STORAGE_KEY`);
+  const blob = new Blob(['<!DOCTYPE html>\n' + fullHtml], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  a.click();
+});
+
+// ---------- search ----------
+const searchEl = document.getElementById('search');
+searchEl.addEventListener('input', () => {
+  const q = searchEl.value.trim();
+  const {byId} = buildIndex();
+  const allBoxes = document.querySelectorAll('#tree .box');
+  allBoxes.forEach(el => el.classList.remove('dim','match','path'));
+  if(!q) return;
+
+  allBoxes.forEach(el => el.classList.add('dim'));
+  document.querySelectorAll('#tree li').forEach(li => li.classList.remove('collapsed'));
+
+  Object.values(byId).forEach(n => {
+    if(n.name.includes(q)){
+      const li = document.querySelector(`li[data-id="${n.id}"]`);
+      if(!li) return;
+      const box = li.querySelector(':scope > .box');
+      box.classList.remove('dim');
+      box.classList.add('match');
+      let cur = n;
+      while(cur.parent){
+        const pli = document.querySelector(`li[data-id="${cur.parent}"]`);
+        const pbox = pli.querySelector(':scope > .box');
+        pbox.classList.remove('dim');
+        pbox.classList.add('path');
+        cur = byId[cur.parent];
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
