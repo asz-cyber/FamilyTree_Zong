@@ -267,6 +267,40 @@
   .od-source{
     margin-top:24px; font-size:11.5px; color:var(--paper-faint); font-family:var(--sans);
   }
+
+  /* ---------- Ancestor tablet ---------- */
+  .tablet-placeholder{
+    text-align:center; padding:80px 20px; color:var(--paper-faint);
+    font-family:var(--sans); font-size:14px;
+  }
+  .tablet-card{
+    border:1px solid var(--line); border-top:2px solid var(--seal);
+    background:var(--ink-2); border-radius:3px; padding:36px 30px;
+  }
+  .tablet-title{
+    text-align:center; font-family:var(--serif); font-size:24px; font-weight:700;
+    color:var(--paper); letter-spacing:0.15em;
+  }
+  .tablet-subtitle{
+    text-align:center; font-family:var(--serif); font-size:15px; color:var(--gold);
+    margin-top:8px; letter-spacing:0.08em;
+  }
+  .tablet-body{
+    display:grid; grid-template-columns:1fr 1.3fr; gap:32px;
+    margin-top:32px; padding-top:28px; border-top:1px solid var(--line);
+  }
+  .tablet-col h4{
+    font-family:var(--serif); font-size:14px; color:var(--gold-dim); font-weight:600;
+    margin-bottom:10px; text-align:center;
+  }
+  .tablet-col p{
+    font-family:var(--serif); font-size:14.5px; line-height:2.1; color:var(--paper);
+    text-align:center;
+  }
+  @media (max-width:600px){
+    .tablet-body{ grid-template-columns:1fr; gap:24px; }
+  }
+
   @media (max-width:600px){
     .genpoem{ grid-template-columns:repeat(5, 1fr); }
   }
@@ -320,6 +354,7 @@
   </header>
 
   <nav class="tabs">
+    <button class="tab-btn" data-tab="tablet">祖先牌位</button>
     <button class="tab-btn" data-tab="origin">序</button>
     <button class="tab-btn active" data-tab="tree">家谱</button>
   </nav>
@@ -361,6 +396,18 @@
 
 <div id="modalRoot"></div>
 
+<div class="tab-panel" data-panel="tablet" id="panelTablet" style="display:none">
+<div class="wrap">
+
+  <div class="origin-detail">
+    <div class="tablet-placeholder">
+      <p>祖先牌位设计中，敬请期待。</p>
+    </div>
+  </div>
+
+</div>
+</div>
+
 <div class="tab-panel" data-panel="origin" id="panelOrigin" style="display:none">
 <div class="wrap">
 
@@ -379,12 +426,6 @@
       <p><b>姓氏来源：</b>①《元和姓纂》上指出，周大夫宗伯之子，后以官名氏。左传有宗鲁，汉宗俱碑，四岳之后望出河东。②《通志·氏族略》记载，宗氏又为宗伯氏，周大夫宗伯之后，齐有宗楼，卫有宗鲁。</p>
       <p>古代的河东，在今山西省永济县西，蒲州镇一带，宗姓发源地便在这里。在宗姓的发展过程中，依照古文献判断，先有复姓宗伯氏，然后才简略成一个字为"宗"氏。</p>
       <p><b>历史名人：</b>周代时，卫国有以身殉义而名垂千古的宗鲁。春秋时，齐有大夫宗楼；汉代有名臣宗伯凤。三国时有镇军大将军宗预。北宋有名臣宗悫，以"乘长风破万里浪"一句名言形容男儿有远大志向而传后世。南宋有抗金名将宗泽，字汝霖，义乌人，有文武才，初为知州，颇有政声，二帝北狩，宗泽以副元帅从磁州起兵援助，累战累胜，后为开封府知府，进驻东京留守，威名远扬北方，呼为"宗爷爷"，金人不敢来东京。宗泽上书多次，要高宗还汴京，收复失地，均为投降派所阻，忧郁成疾，卒谥忠简，著有《宗忠简集》。齐有艺术家宗测，明代有文学家宗臣、宗显，有镇守灵山卫都督宗天一，清代江都有词人宗元鼎。</p>
-    </div>
-
-    <div class="od-section">
-      <h3>堂号与楹联</h3>
-      <p><b>忠诚堂。</b>出自宋代宗泽的故事：宗泽，字汝霖，元石进士，文武全才，为抗金名将，历史上声望颇高。这位忠诚老将，死后谥为忠简，宗氏家人为纪念这位忠诚老将，遂以"忠诚"为堂名，一直沿用到后世。</p>
-      <p><b>楹联：</b>气概凌云（宗悫），忠态日（宗泽）。</p>
     </div>
 
     <div class="od-section">
